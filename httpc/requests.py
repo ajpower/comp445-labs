@@ -3,16 +3,18 @@ import socket
 from urllib.parse import urlsplit
 from urllib.parse import urlparse
 
-
+# Receives all the data from the socket until EOF or close.
 def _recvall(socket: socket.socket):
     """"""
-    BUF_SIZE = 4096
-    block = socket.recv(BUF_SIZE)
-    data = block
-    while len(block) == BUF_SIZE:
-        block = socket.recv(BUF_SIZE)
-        data += block
-    return data
+    BUFFER_SIZE = 8192
+    response = b""
+    while True:
+        last_buff = sock.recv(BUFFER_SIZE, socket.MSG_WAITALL)
+        response += last_buff
+        if len(last_buff) < BUFFER_SIZE:
+            break
+
+    return response
 
 
 def _get_body(message: str):
@@ -68,81 +70,68 @@ def GET(urlstr: str, headers=None, timeout=None, verbose=False):
 # Prints debug information if verbose is set TODO verbose flag
 #
 # The function returns a dictionary with the key headers, body and status
-def post(url: str, data=None, headers={}, verbose=False):
-    parsedurl = urlparse(url)
-    port = parsedurl.port
+def POST(url: str, data=None, headers={}, verbose=False):
+    parsed_url = urlparse(url)
+    port = parsed_url.port if parsed_url.port else 80
     method = "POST"
-    httpversion = "1.0"
-    if port is None:
-        port = 80
+    http_version = "1.0"
 
-    if data is None:
-        contentlength = 0
-    else:
-        contentlength = len(data)
+    content_length = len(data) if data else 0
 
     # Add Standard headers
-    headers["Host"] = parsedurl.hostname
+    headers["Host"] = parsed_url.hostname
     headers["User-Agent"] = "Concordia-HTTP/1.0"
-    headers["Content-Length"] = str(contentlength)
+    headers["Content-Length"] = str(content_length)
 
-    headertxt = buildheaders(headers)
+    header_txt = build_headers(headers)
 
     # Build request
-    request = method + " " + parsedurl.path + " HTTP/" + httpversion + "\r\n"
-    request += headertxt
+    request = method + " " + parsed_url.path + " HTTP/" + http_version + "\r\n"
+    request += header_txt
     request += "\r\n"
 
     if data is not None:
         request += data
 
     # Call server
-    sock = socket.create_connection((parsedurl.hostname, port))
+    sock = socket.create_connection((parsed_url.hostname, port))
     sock.sendall(request.encode("utf-8"))
-    response = recvall(sock).decode("utf-8")
+    response = _recvall(sock).decode("utf-8")
 
-    response = parseresponse(response)
+    response = parse_response(response)
     return response
 
+
 # Parse the response string and returns a dict with headers, body, status{code,text}
-def parseresponse(response: str):
+def parse_response(response: str):
     response = response.split("\r\n\r\n")
     headers = response[0].split("\r\n")
     body = response[1]
 
     status = headers[0].split(" ")
-    statuscode = int(status[1])
-    statustxt = status[2]
+    status_code = int(status[1])
+    status_txt = status[2]
 
-    headers = parseheaders(headers[1:])
-    return {"status": {"code" : statuscode, "text": statustxt}, "headers": headers, "body": body}
+    headers = parse_headers(headers[1:])
+    return {"status": {"code" : status_code, "text": status_txt}, "headers": headers, "body": body}
+
 
 # Parse a list of headers line into a dict of name : value
-def parseheaders(headers):
-    headermap = {}
+def parse_headers(headers):
+    header_map = {}
     for header in headers:
         prs = header.split(":")
         name = prs[0].strip()
         val = prs[1].strip()
-        headermap[name] = val
+        header_map[name] = val
 
-    return headermap
+    return header_map
+
 
 # Builds a string of headers from a dict of name : val
-def buildheaders(headers):
-    headertext = ""
+def build_headers(headers):
+    header_text = ""
     for name, val in headers.items():
-        headertext += name + " : " + val + "\r\n"
-    return headertext
+        header_text += name + " : " + val + "\r\n"
+    return header_text
 
-# Receives all the data from the socket until EOF or close.
-def recvall(sock):
-    BUFFER_SIZE = 8192
-    response = b""
-    while True:
-        lastbuff = sock.recv(BUFFER_SIZE, socket.MSG_WAITALL)
-        response += lastbuff
-        if len(lastbuff) < BUFFER_SIZE:
-            break
-
-    return response
