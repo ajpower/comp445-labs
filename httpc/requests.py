@@ -25,6 +25,7 @@ def _get_body(message: str):
 def GET(urlstr: str, headers=None, timeout=None, verbose=False):
     """TODO docstring.
     TODO handle timeout exception.
+    TODO check url format?
     """
     if not headers:
         headers = {}
