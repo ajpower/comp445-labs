@@ -1,6 +1,7 @@
 """Implements functions for performing GET and POST requests."""
 import socket
 from urllib.parse import urlsplit
+from urllib.parse import urlparse
 
 
 def _recvall(socket: socket.socket):
@@ -60,3 +61,87 @@ def GET(urlstr: str, headers=None, timeout=None, verbose=False):
     response = _recvall(sock).decode('UTF-8')
 
     return response if verbose else _get_body(response)
+
+
+# Send a post request to the given url, with the data and headers.
+# Prints debug information if verbose is set TODO verbose flag
+#
+# The function returns a dictionary with the key headers, body and status
+def post(url: str, data=None, headers={}, verbose=False):
+    parsedurl = urlparse(url)
+    port = parsedurl.port
+    method = "POST"
+    httpversion = "1.0"
+    if port is None:
+        port = 80
+
+    if data is None:
+        contentlength = 0
+    else:
+        contentlength = len(data)
+
+    # Add Standard headers
+    headers["Host"] = parsedurl.hostname
+    headers["User-Agent"] = "Concordia-HTTP/1.0"
+    headers["Content-Length"] = str(contentlength)
+
+    headertxt = buildheaders(headers)
+
+    # Build request
+    request = method + " " + parsedurl.path + " HTTP/" + httpversion + "\r\n"
+    request += headertxt
+    request += "\r\n"
+
+    if data is not None:
+        request += data
+
+    # Call server
+    sock = socket.create_connection((parsedurl.hostname, port))
+    sock.sendall(request.encode("utf-8"))
+    response = recvall(sock).decode("utf-8")
+
+    response = parseresponse(response)
+    return response
+
+# Parse the response string and returns a dict with headers, body, status{code,text}
+def parseresponse(response: str):
+    response = response.split("\r\n\r\n")
+    headers = response[0].split("\r\n")
+    body = response[1]
+
+    status = headers[0].split(" ")
+    statuscode = int(status[1])
+    statustxt = status[2]
+
+    headers = parseheaders(headers[1:])
+    return {"status": {"code" : statuscode, "text": statustxt}, "headers": headers, "body": body}
+
+# Parse a list of headers line into a dict of name : value
+def parseheaders(headers):
+    headermap = {}
+    for header in headers:
+        prs = header.split(":")
+        name = prs[0].strip()
+        val = prs[1].strip()
+        headermap[name] = val
+
+    return headermap
+
+# Builds a string of headers from a dict of name : val
+def buildheaders(headers):
+    headertext = ""
+    for name, val in headers.items():
+        headertext += name + " : " + val + "\r\n"
+    return headertext
+
+# Receives all the data from the socket until EOF or close.
+def recvall(sock):
+    BUFFER_SIZE = 8192
+    response = b""
+    while True:
+        lastbuff = sock.recv(BUFFER_SIZE, socket.MSG_WAITALL)
+        response += lastbuff
+        if len(lastbuff) < BUFFER_SIZE:
+            break
+
+    return response
