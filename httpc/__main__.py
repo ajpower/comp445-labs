@@ -40,7 +40,12 @@ parser = argparse.ArgumentParser(
     "httpc is a curl-like application but supports HTTP protocol only.",
     add_help=False,
     epilog='Use "httpc help [command]" for more information about a command.')
-subparsers = parser.add_subparsers(title="The commands are")
+subparsers = parser.add_subparsers(
+    title="The commands are",
+    help="""
+get executes a HTTP GET request and prints the response.
+post executes a HTTP POST request and prints the response.
+help prints this screen.""")
 
 get_parser = subparsers.add_parser(
     "get",
