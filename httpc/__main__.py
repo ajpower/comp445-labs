@@ -38,8 +38,9 @@ def execute_post(args):
 parser = argparse.ArgumentParser(
     description=
     "httpc is a curl-like application but supports HTTP protocol only.",
-    add_help=False)
-subparsers = parser.add_subparsers(title="command", metavar="command")
+    add_help=False,
+    epilog='Use "httpc help [command]" for more information about a command.')
+subparsers = parser.add_subparsers(title="The commands are")
 
 get_parser = subparsers.add_parser(
     "get",
@@ -58,7 +59,7 @@ get_parser.add_argument(
     action="append",
     default=[],
     dest="headers")
-get_parser.add_argument("url", metavar="URL")
+get_parser.add_argument("url", help="The URL of the host.", metavar="URL")
 get_parser.set_defaults(func=execute_get)
 
 post_parser = subparsers.add_parser(
@@ -89,14 +90,21 @@ data_group.add_argument(
     help="Associates the content of a file to the body HTTP POST request.",
     metavar="file",
     dest="file")
-post_parser.add_argument("url", metavar="URL")
+post_parser.add_argument("url", help="The URL of the host.", metavar="URL")
 post_parser.set_defaults(func=execute_post)
 
 help_parser = subparsers.add_parser("help", add_help=False)
 help_parser.add_argument(
-    "command", choices=("get", "put"), nargs="?", metavar="command")
-# help_parser.set_defaults(func=execute_help)
+    "command", choices=("get", "post"), nargs="?", metavar="command")
+parser.set_defaults(command=None)
 
 args = parser.parse_args()
-
-args.func(args)
+try:
+    args.func(args)
+except AttributeError:
+    if args.command is None:
+        parser.print_help()
+    elif args.command == "get":
+        get_parser.print_help()
+    elif args.command == "post":
+        post_parser.print_help()
