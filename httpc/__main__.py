@@ -11,8 +11,16 @@ def execute_get(args):
         args: Argparse argument object.
     """
     headers = dict(kv.split(":") for kv in args.headers)
-    response = GET(args.url, headers=headers)
-    print(response if args.verbose else response.body)
+    url = args.url
+    while True:
+        response = GET(url, headers=headers)
+        print(response if args.verbose else response.body)
+        if response.code == 301 or response.code == 302:
+            url = response.headers['Location'].strip()
+            print('Redirecting to new url: {}'.format(url))
+        else:
+            break
+
 
 
 def execute_post(args):
@@ -31,8 +39,15 @@ def execute_post(args):
         data = args.inline_data
 
     headers = dict(kv.split(":") for kv in args.headers)
-    response = POST(args.url, data=data, headers=headers)
-    print(response if args.verbose else response.body)
+    url = args.url
+    while True:
+        response = POST(url, data=data, headers=headers)
+        print(response if args.verbose else response.body)
+        if response.code == 301 or response.code == 302:
+            url = response.headers['Location'].strip()
+            print('Redirecting to new url: {}'.format(url))
+        else:
+            break
 
 
 parser = argparse.ArgumentParser(

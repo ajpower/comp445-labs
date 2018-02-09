@@ -75,7 +75,7 @@ def GET(url: str, headers=None):
     netloc = parsed_url.netloc
     host = parsed_url.hostname
     port = parsed_url.port or 80
-    path = parsed_url.path or "\\"
+    path = parsed_url.path or "/"
     query = parsed_url.query
     request_uri = "{}?{}".format(path, query) if query else path
 
@@ -118,7 +118,7 @@ def POST(url: str, data="", headers=None):
     netloc = parsed_url.netloc
     host = parsed_url.hostname
     port = parsed_url.port or 80
-    path = parsed_url.path or "\\"
+    path = parsed_url.path or "/"
     query = parsed_url.query
     request_uri = "{}?{}".format(path, query) if query else path
 
