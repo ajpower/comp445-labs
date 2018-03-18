@@ -1,4 +1,4 @@
-"""Logging library"""
+"""Thread Safe Logging library"""
 
 from threading import Thread
 from queue import Queue
@@ -10,6 +10,9 @@ log_verbose = False
 
 
 def set_logger(verbose: bool = True):
+    """Starts the logger thread
+    :param verbose: Set to False to suppress logging
+    """
     global log_queue, log_verbose
     log_verbose = verbose
 
@@ -21,6 +24,8 @@ def set_logger(verbose: bool = True):
 
 
 def write(msg: str):
+    """Writes to the logging output
+    """
     if not log_queue:
         set_logger()
     if log_verbose:
@@ -28,6 +33,8 @@ def write(msg: str):
 
 
 class LogThread(Thread):
+    """Thread object to handle the log queue and output to the console
+    """
     def __init__(self, log_destination):
         super().__init__()
         self.log_destination = log_destination
