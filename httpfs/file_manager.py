@@ -4,7 +4,7 @@ TODO Add Thread Safety at file level
 Thread safety is handled at the directory level:
     Only one thread can write to any file in the directory at a time
     Multiple read can be active at a time.
-    No Reader/Writer Priority
+    Writer Priority
 """
 
 import os
@@ -41,9 +41,9 @@ def get_file(filename: str):
     :return: (str) Data of the file
     """
     file_manager_lock.read_acquire()
-    print('acquired read lock')
+    print('acquired read lock' + filename)
+    print('releasing read lock' + filename)
     file_manager_lock.read_release()
-    print('released read lock')
 
 
 def write_file(filename: str, data: str):
@@ -52,6 +52,6 @@ def write_file(filename: str, data: str):
     :param data: (str) Data to write, txt only.
     """
     file_manager_lock.write_acquire()
-    print('acquired write lock')
+    print('acquired write lock' + filename)
+    print('releasing write lock' + filename)
     file_manager_lock.write_release()
-    print('released write lock')
