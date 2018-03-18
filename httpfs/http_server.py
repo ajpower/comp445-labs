@@ -111,14 +111,22 @@ class HTTPServer:
         self.conn = conn
 
     def error(self, status: int, msg: str):
-        response_line = "{} {} {}".format(http_server_version, status, msg)
-        response = "\r\n".join((response_line, "Server: {}".format(http_server_name), "Content-Length: 0"))
-        self.conn.sendall(response.encode("UTF-8"))
+        response_line = self._build_response_line(status, msg)
+        response = "\r\n".join((response_line, 'Server: {}'.format(http_server_name), 'Content-Length: 0'))
+        self.conn.sendall(response.encode('UTF-8'))
         self.conn.close()
 
-    def response(self, status: int, data):
+    def response(self, data: str = ''):
         ## TODO method stub and signature change
-        pass
+        response_line = self._build_response_line(200, 'OK')
+        response = "\r\n".join(
+            (response_line, "Server: {}".format(http_server_name), 'Content-Length: {}'.format(len(data)), '\r\n', data))
+        self.conn.sendall(response.encode('UTF-8'))
+        self.conn.close()
+
+    @staticmethod
+    def _build_response_line(status: int, msg: str):
+        return "{} {} {}".format(http_server_version, status, msg)
 
 
 class HTTPHandler(ABC):

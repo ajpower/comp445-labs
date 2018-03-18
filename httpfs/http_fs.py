@@ -5,6 +5,7 @@ from http_server import HTTPHandler
 class HTTPHandlerFs(HTTPHandler):
     def do_GET(self):
         logger.write('It works GET\n{}'.format(self.request))
+        self.server.response('This is a response\r\n')
 
     def do_POST(self):
         logger.write('It works POST\n{}'.format(self.request))
