@@ -100,10 +100,10 @@ class ConnectionHandlerThread(Thread):
                 http_handler = self.HTTPHandlerImplClass(request, server)
                 http_handler.handle()
             else:
-                server.error(404, "Not Found")
+                server.send_error(404, "Not Found")
         except Exception as inst:
             logger(inst)
-            server.error(500, 'Internal Server Error')
+            server.send_error(500, 'Internal Server Error')
         finally:
             self.conn.close()
 
@@ -120,7 +120,7 @@ class ConnectionHandlerThread(Thread):
         return RequestPreamble(data.decode('UTF-8'))
 
 
-## TODO handling response and error
+# TODO handling response and error
 class HTTPServer:
     """Represent the HTTPServer connection to a client.
     Used to send response to the client.
@@ -128,7 +128,7 @@ class HTTPServer:
     def __init__(self, conn):
         self.conn = conn
 
-    def error(self, status: int, msg: str):
+    def send_error(self, status: int, msg: str):
         """Send an error to the client with no data
         :param status: int Status code
         :param msg: str Status message
@@ -138,11 +138,11 @@ class HTTPServer:
         self.conn.sendall(response.encode('UTF-8'))
         self.conn.close()
 
-    def response(self, data: str = ''):
+    def send_response(self, data: str = ''):
         """Sends a response to the client with a data block
         :param data: str Data block
         """
-        ## TODO method stub and signature change
+        # TODO method stub and signature change
         response_line = self._build_response_line(200, 'OK')
         response = "\r\n".join(
             (response_line, "Server: {}".format(http_server_name), 'Content-Length: {}'.format(len(data)), '\r\n', data))
