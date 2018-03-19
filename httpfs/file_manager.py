@@ -8,8 +8,6 @@ Thread safety is handled at the directory level:
 """
 
 import os
-from queue import Queue
-from threading import Lock
 from rwlock import FileManagerLock
 
 
