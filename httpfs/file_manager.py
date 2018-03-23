@@ -10,7 +10,6 @@ Thread safety is handled at the directory level:
 import os
 from rwlock import FileManagerLock
 
-
 file_manager_directory = '.'
 file_manager_lock = FileManagerLock()
 
@@ -30,7 +29,10 @@ def list_dir():
     """Returns a list of all files in the directory
     :return: List of files in the directory
     """
-    return [f for f in os.listdir(file_manager_directory) if os.path.isfile("/".join(file_manager_directory, f))]
+    return [
+        f for f in os.listdir(file_manager_directory)
+        if os.path.isfile("/".join(file_manager_directory, f))
+    ]
 
 
 def get_file(filename: str):
@@ -39,18 +41,23 @@ def get_file(filename: str):
     Throws an error if the file is a directory or a subdirectory exists
 
     :param filename: File name
-    :return: (str) Data of the file
+    :return: (bytes) Data of the file
     """
+    # Print contents of root directory if filename is "/".
+    if filename == '/':
+        files = os.listdir('/')
+        return files.join('\n')
+
     # Do not continue if there's a directory or the name isn't a file
     if os.path.dirname(filename) or not os.path.isfile(filename):
         raise ValueError("Invalid filename")
 
     file_manager_lock.read_acquire()
-    print('acquired read lock' + filename)
+    # print('acquired read lock' + filename)
+    with open(filename, mode='r') as f:
+        return f.read()
 
-
-
-    print('releasing read lock' + filename)
+    # print('releasing read lock' + filename)
     file_manager_lock.read_release()
 
 
@@ -59,7 +66,11 @@ def write_file(filename: str, data: str):
     :param filename: File name
     :param data: (str) Data to write, txt only.
     """
+    if os.path.dirname(filename):
+        raise ValueError("Filename specifies an existing directory.")
     file_manager_lock.write_acquire()
-    print('acquired write lock' + filename)
-    print('releasing write lock' + filename)
+    # print('acquired write lock' + filename)
+    with open(filename, mode='w') as f:
+        f.write(data)
+    # print('releasing write lock' + filename)
     file_manager_lock.write_release()
