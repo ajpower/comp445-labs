@@ -1,7 +1,6 @@
 import logger
-import http_server
-from http_fs import HTTPHandlerFs
+import http_fs
 
 
 logger.set_logger(True)
-http_server.start_server('127.0.0.1', 8080, HTTPHandlerFs)
+http_fs.start_file_server('127.0.0.1', 8080)

@@ -35,11 +35,21 @@ def list_dir():
 
 def get_file(filename: str):
     """Retrieve the data from a file
+    Only files in the directory can be retrieved, no sub-folders.
+    Throws an error if the file is a directory or a subdirectory exists
+
     :param filename: File name
     :return: (str) Data of the file
     """
+    # Do not continue if there's a directory or the name isn't a file
+    if os.path.dirname(filename) or not os.path.isfile(filename):
+        raise ValueError("Invalid filename")
+
     file_manager_lock.read_acquire()
     print('acquired read lock' + filename)
+
+
+
     print('releasing read lock' + filename)
     file_manager_lock.read_release()
 
