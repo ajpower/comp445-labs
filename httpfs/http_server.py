@@ -146,15 +146,18 @@ class HTTPServer:
         self.conn.sendall(response.encode('UTF-8'))
         self.conn.close()
 
-    def send_response(self, data: str = ''):
+    def send_response(self, data: str = '', headers = {}):
         """Sends a response to the client with a data block
         :param data: str Data block
         """
-        # TODO method stub and signature change
         response_line = self._build_response_line(200, 'OK')
+        headers.setdefault("Content-Length", len(data))
+
+        headers_line = "".join("{}:{}\r\n".format(k, v) for k, v in headers.items())
         response = "\r\n".join(
             (response_line, "Server: {}".format(http_server_name),
-             'Content-Length: {}'.format(len(data)), '\r\n', data))
+             headers_line, '\r\n', data))
+
         self.conn.sendall(response.encode('UTF-8'))
         self.conn.close()
 
@@ -186,6 +189,7 @@ class HTTPHandler(ABC):
         logger.write('handling request\n{}'.format(self.request))
 
         if self.request.preamble.http_method == 'GET':
+
             self.do_GET()
         elif self.request.preamble.http_method == 'POST':
             self.do_POST()

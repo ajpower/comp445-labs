@@ -1,6 +1,5 @@
 """File Server Manager - Cheap Thread safety
 
-TODO Add Thread Safety at file level
 Thread safety is handled at the directory level:
     Only one thread can write to any file in the directory at a time
     Multiple read can be active at a time.
@@ -31,7 +30,7 @@ def list_dir():
     """
     return [
         f for f in os.listdir(file_manager_directory)
-        if os.path.isfile("/".join(file_manager_directory, f))
+        if os.path.isfile("/".join((file_manager_directory, f)))
     ]
 
 

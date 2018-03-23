@@ -1,5 +1,6 @@
 import logger
 import http_server
+import json
 from file_manager import set_dir, list_dir, get_file, write_file
 from http_server import HTTPHandler
 
@@ -17,11 +18,20 @@ def start_file_server(host, port: int, directory: str = '.'):
 
 class HTTPHandlerFs(HTTPHandler):
     def do_GET(self):
-        logger.write('It works GET\n{}'.format(self.request))
-        self.server.send_response('This is a response\r\n')
+        logger.write('URL: {}'.format(self.request.preamble.url))
+
+        url = self.request.preamble.url
+        if url == "/":
+            files = json.dumps({'files': list_dir()})
+            self.server.send_response(files, {"Content-Type": "application/json"})
+        else:
+            try:
+                self.server.send_response(get_file(url))
+            except ValueError:
+                self.server.send_error("404", "Not Found")
 
     def do_POST(self):
-        logger.write('It works POST\n{}'.format(self.request))
+        logger.write('POST request\n{}'.format(self.request))
 
     def do_invalid_method(self):
         logger.write('It works invalid\n{}'.format(self.request))
