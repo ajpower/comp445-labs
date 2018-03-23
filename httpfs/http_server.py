@@ -1,4 +1,4 @@
-"""Implements the socket listener and parsing of input"""
+"""Implements the socket listener and parsing of input."""
 
 import socket
 import logger
@@ -13,13 +13,13 @@ http_server_LF = '\n'.encode('UTF-8')
 
 
 def _has_new_line(data):
-    """Returns true if the data includes a new line
-    """
-    return http_server_CRLF in data or http_server_CR in data or http_server_LF in data
+    """Return true if the data includes a new line."""
+    return http_server_CR in data or http_server_LF in data
 
 
 def _recvline(sock: socket.socket):
-    """Receive a single line from the socket until EOF, close or CRLF and return as a byte string.
+    """Receive a single line from the socket until EOF, close, or CRLF and
+    return as a byte string.
     """
     BUFFER_SIZE = 1024
 
@@ -35,7 +35,8 @@ def _recvline(sock: socket.socket):
 
 
 def _recvall(sock: socket.socket, length: int):
-    """Receive all data from the socket until length, EOF or close and return as a byte string.
+    """Receive all data from the socket until length, EOF, or close and return
+    as a byte string.
     """
     BUFFER_SIZE = 8192
 
@@ -61,7 +62,8 @@ def start_server(host, port: int, HTTPHandlerImplClass):
         logger.write('HTTP server listening at {}'.format(port))
         while True:
             conn, addr = listener.accept()
-            handler_thread = ConnectionHandlerThread(conn, host, addr, HTTPHandlerImplClass)
+            handler_thread = ConnectionHandlerThread(conn, host, addr,
+                                                     HTTPHandlerImplClass)
             handler_thread.setDaemon(True)
             handler_thread.start()
     finally:
@@ -71,7 +73,9 @@ def start_server(host, port: int, HTTPHandlerImplClass):
 class ConnectionHandlerThread(Thread):
     """Instantiated when a new connection is accepted
     """
-    def __init__(self, conn: socket.socket, server_host, client_addr, HTTPHandlerImplClass):
+
+    def __init__(self, conn: socket.socket, server_host, client_addr,
+                 HTTPHandlerImplClass):
         """
         Setup the connection thread.
         :param conn: connection socket.
@@ -96,7 +100,8 @@ class ConnectionHandlerThread(Thread):
                     data_length = request_preamble.headers['Content-Length']
                     request_data = _recvall(self.conn, int(data_length))
 
-                request = Request(request_preamble, request_data.decode('UTF-8'))
+                request = Request(request_preamble,
+                                  request_data.decode('UTF-8'))
                 http_handler = self.HTTPHandlerImplClass(request, server)
                 http_handler.handle()
             else:
@@ -125,6 +130,7 @@ class HTTPServer:
     """Represent the HTTPServer connection to a client.
     Used to send response to the client.
     """
+
     def __init__(self, conn):
         self.conn = conn
 
@@ -134,7 +140,9 @@ class HTTPServer:
         :param msg: str Status message
         """
         response_line = self._build_response_line(status, msg)
-        response = "\r\n".join((response_line, 'Server: {}'.format(http_server_name), 'Content-Length: 0'))
+        response = "\r\n".join(
+            (response_line, 'Server: {}'.format(http_server_name),
+             'Content-Length: 0'))
         self.conn.sendall(response.encode('UTF-8'))
         self.conn.close()
 
@@ -145,7 +153,8 @@ class HTTPServer:
         # TODO method stub and signature change
         response_line = self._build_response_line(200, 'OK')
         response = "\r\n".join(
-            (response_line, "Server: {}".format(http_server_name), 'Content-Length: {}'.format(len(data)), '\r\n', data))
+            (response_line, "Server: {}".format(http_server_name),
+             'Content-Length: {}'.format(len(data)), '\r\n', data))
         self.conn.sendall(response.encode('UTF-8'))
         self.conn.close()
 
@@ -166,6 +175,7 @@ class HTTPHandler(ABC):
         request (Request): Request from the HTTP connection.
         server (HTTPServer): server abstraction for response.
     """
+
     def __init__(self, request: 'Request', server: HTTPServer):
         self.request = request
         self.server = server
@@ -241,7 +251,8 @@ class Request:
 
     def __str__(self):
         """Return a string representation of the request."""
-        request_line = "{} {} {}".format(self.preamble.http_method, self.preamble.url,
+        request_line = "{} {} {}".format(self.preamble.http_method,
+                                         self.preamble.url,
                                          self.preamble.http_version)
         headers = "\n".join(
             "{}: {}".format(k, v) for k, v in self.preamble.headers.items())
