@@ -35,5 +35,15 @@ class HTTPHandlerFs(HTTPHandler):
     def do_POST(self):
         logger.write('POST request\n{}'.format(self.request))
 
+        url = self.request.preamble.url
+        if not url.startswith("/"):
+            self.server.send_error("400", "Bad Request")
+        else:
+            try:
+                write_file(url, self.request.body)
+                self.server.send_response()
+            except ValueError:
+                self.server.send_error("400", "Bad Request")
+
     def do_invalid_method(self):
         logger.write('It works invalid\n{}'.format(self.request))
