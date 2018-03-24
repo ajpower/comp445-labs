@@ -118,6 +118,9 @@ class ConnectionHandlerThread(Thread):
         data = b''
         while True:
             last_line = _recvline(self.conn)
+            if last_line.endswith(http_server_CRLF + http_server_CRLF):
+                data += last_line
+                break
             if http_server_CRLF == last_line or http_server_LF == last_line:
                 break
             else:
