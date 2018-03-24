@@ -94,18 +94,17 @@ class ConnectionHandlerThread(Thread):
         try:
             server = HTTPServer(self.conn)
             request_preamble = self._recv_preamble()
+            logger.write(request_preamble.headers)
             request_data = b''
-            if 'Host' in request_preamble.headers and request_preamble.headers['Host'] == self.server_host:
-                if 'Content-Length' in request_preamble.headers:
-                    data_length = request_preamble.headers['Content-Length']
-                    request_data = _recvall(self.conn, int(data_length))
+            
+            if 'Content-Length' in request_preamble.headers:
+                data_length = request_preamble.headers['Content-Length']
+                request_data = _recvall(self.conn, int(data_length))
 
-                request = Request(request_preamble,
-                                  request_data.decode('UTF-8'))
-                http_handler = self.HTTPHandlerImplClass(request, server)
-                http_handler.handle()
-            else:
-                server.send_error(404, "Not Found")
+            request = Request(request_preamble,
+                              request_data.decode('UTF-8'))
+            http_handler = self.HTTPHandlerImplClass(request, server)
+            http_handler.handle()
         except Exception as inst:
             logger(inst)
             server.send_error(500, 'Internal Server Error')
