@@ -21,7 +21,7 @@ def _recvline(sock: socket.socket):
     """Receive a single line from the socket until EOF, close, or CRLF and
     return as a byte string.
     """
-    BUFFER_SIZE = 1024
+    BUFFER_SIZE = 1
 
     data = b""
     while True:
@@ -96,7 +96,7 @@ class ConnectionHandlerThread(Thread):
             request_preamble = self._recv_preamble()
             logger.write(request_preamble.headers)
             request_data = b''
-            
+
             if 'Content-Length' in request_preamble.headers:
                 data_length = request_preamble.headers['Content-Length']
                 request_data = _recvall(self.conn, int(data_length))
