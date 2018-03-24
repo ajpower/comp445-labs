@@ -12,11 +12,6 @@ http_server_CR = '\r'.encode('UTF-8')
 http_server_LF = '\n'.encode('UTF-8')
 
 
-def _has_new_line(data):
-    """Return true if the data includes a new line."""
-    return http_server_CR in data or http_server_LF in data
-
-
 def _recvline(sock: socket.socket):
     """Receive a single line from the socket until EOF, close, or CRLF and
     return as a byte string.
@@ -29,7 +24,7 @@ def _recvline(sock: socket.socket):
         if not last_buff:
             break
         data += last_buff
-        if _has_new_line(last_buff):
+        if data.endswith(http_server_CRLF):
             break
     return data
 
@@ -94,12 +89,13 @@ class ConnectionHandlerThread(Thread):
         try:
             server = HTTPServer(self.conn)
             request_preamble = self._recv_preamble()
-            logger.write(request_preamble.headers)
+            logger.write('Headers:\n{}'.format(request_preamble.headers))
             request_data = b''
 
             if 'Content-Length' in request_preamble.headers:
                 data_length = request_preamble.headers['Content-Length']
                 request_data = _recvall(self.conn, int(data_length))
+                logger.write('Data:\n{}'.format(request_data))
 
             request = Request(request_preamble,
                               request_data.decode('UTF-8'))
@@ -117,9 +113,9 @@ class ConnectionHandlerThread(Thread):
         data = b''
         while True:
             last_line = _recvline(self.conn)
-            if last_line.endswith(http_server_CRLF + http_server_CRLF):
-                data += last_line
-                break
+                # if last_line.endswith(http_server_CRLF + http_server_CRLF):
+                #     data += last_line
+                #     break
             if http_server_CRLF == last_line or http_server_LF == last_line:
                 break
             else:

@@ -18,7 +18,7 @@ def start_file_server(host, port: int, directory: str = '.'):
 
 class HTTPHandlerFs(HTTPHandler):
     def do_GET(self):
-        logger.write('URL: {}'.format(self.request.preamble.url))
+        logger.write('Handler GET requestURL: {}'.format(self.request.preamble.url))
 
         url = self.request.preamble.url
         if url == "/":
@@ -28,22 +28,25 @@ class HTTPHandlerFs(HTTPHandler):
             self.server.send_error("400", "Bad Request")
         else:
             try:
-                self.server.send_response(get_file(url.lstrip("/")))
-            except ValueError:
+                self.server.send_response(get_file(url.lstrip("/")), {"Content-Type": "text/*"})
+            except Exception as err:
+                logger.write(err)
                 self.server.send_error("404", "Not Found")
 
     def do_POST(self):
-        logger.write('POST request\n{}'.format(self.request))
+        logger.write('Handler POST requestURL: {}'.format(self.request.preamble.url))
 
         url = self.request.preamble.url
         if not url.startswith("/"):
             self.server.send_error("400", "Bad Request")
         else:
             try:
-                write_file(url, self.request.body)
+                write_file(url.lstrip("/"), self.request.body)
                 self.server.send_response()
-            except ValueError:
+            except Exception as err:
+                logger.write(err)
                 self.server.send_error("400", "Bad Request")
+            logger.write('File correctly added')
 
     def do_invalid_method(self):
-        logger.write('It works invalid\n{}'.format(self.request))
+        logger.write('Invalid Method \n{}'.format(self.request))

@@ -52,12 +52,12 @@ def get_file(filename: str):
         raise ValueError("Invalid filename")
 
     file_manager_lock.read_acquire()
-    # print('acquired read lock' + filename)
-    with open(filename, mode='r') as f:
-        return f.read()
-
-    # print('releasing read lock' + filename)
-    file_manager_lock.read_release()
+    try:
+        with open(filename, mode='r') as f:
+            read_data =  f.read()
+    finally:
+        file_manager_lock.read_release()
+    return read_data
 
 
 def write_file(filename: str, data: str):
@@ -67,9 +67,10 @@ def write_file(filename: str, data: str):
     """
     if os.path.dirname(filename):
         raise ValueError("Filename specifies an existing directory.")
+
     file_manager_lock.write_acquire()
-    # print('acquired write lock' + filename)
-    with open(filename, mode='w') as f:
-        f.write(data)
-    # print('releasing write lock' + filename)
-    file_manager_lock.write_release()
+    try:
+        with open(filename, mode='w') as f:
+            f.write(data)
+    finally:
+        file_manager_lock.write_release()
