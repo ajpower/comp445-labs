@@ -24,9 +24,11 @@ class HTTPHandlerFs(HTTPHandler):
         if url == "/":
             files = json.dumps({'files': list_dir()})
             self.server.send_response(files, {"Content-Type": "application/json"})
+        elif not url.startswith("/"):
+            self.server.send_error("400", "Bad Request")
         else:
             try:
-                self.server.send_response(get_file(url))
+                self.server.send_response(get_file(url.lstrip("/")))
             except ValueError:
                 self.server.send_error("404", "Not Found")
 
