@@ -140,7 +140,7 @@ class HTTPServer:
         response_line = self._build_response_line(status, msg)
         response = "\r\n".join(
             (response_line, 'Server: {}'.format(http_server_name),
-             'Content-Length: 0'))
+             'Content-Length: 0', "\r\n"))
         self.conn.sendall(response.encode('UTF-8'))
         self.conn.close()
 
