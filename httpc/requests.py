@@ -80,7 +80,7 @@ def GET(url: str, headers=None):
     request_uri = "{}?{}".format(path, query) if query else path
 
     # Add standard headers.
-    headers.setdefault("Host", netloc)
+    headers.setdefault("Host", host)
     headers.setdefault("User-Agent", "Concordia-HTTP/1.0")
 
     # Construct HTTP request message.
@@ -93,7 +93,8 @@ def GET(url: str, headers=None):
     # Open a socket, connect to host, send request, and retrieve response.
     sock = socket.create_connection((host, port))
     sock.sendall(request.encode("UTF-8"))
-    response = _recvall(sock).decode("UTF-8")
+    data = _recvall(sock)
+    response = data.decode("UTF-8")
 
     return Response(response)
 
@@ -123,7 +124,7 @@ def POST(url: str, data="", headers=None):
     request_uri = "{}?{}".format(path, query) if query else path
 
     # Add standard headers.
-    headers.setdefault("Host", netloc)
+    headers.setdefault("Host", host)
     headers.setdefault("User-Agent", "Concordia-HTTP/1.0")
     headers.setdefault("Content-Length", str(len(data)))
 
