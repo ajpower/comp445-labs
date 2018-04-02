@@ -18,7 +18,7 @@ class Message:
         # TODO Parsing of a received message
         pass
 
-    def __init__(self, user: str, message: str, command: str):
+    def __init__(self, user: str, command: str, message: str = ''):
         """Creates a new message."""
         self.user = user
         self.message = message
@@ -27,5 +27,5 @@ class Message:
     def __str__(self):
         """Return a string representation of the message to transmit."""
         message = "user:{}\ncommand:{}\nmessage:{}\n\n".format(self.user, self.command,
-                                        self.message)
+                                                               self.message)
         return message
