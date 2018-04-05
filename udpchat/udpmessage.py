@@ -29,6 +29,7 @@ class Message:
     def parse(message: str):
         """Parse the input string and return a Message instance."""
         parts = message.split('\n', maxsplit=3)
-        self.user = parts[0][len('user:'):]
-        self.command = parts[1][len('command:'):]
-        self.message = parts[2][len('message:'):]
+        user = parts[0][len('user:'):]
+        command = parts[1][len('command:'):]
+        message = parts[2][len('message:'):]
+        return Message(user, command, message)
