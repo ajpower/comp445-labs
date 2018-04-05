@@ -13,11 +13,6 @@ class Message:
         message (str): Message payload.
     """
 
-    def __init__(self, response: str):
-        """Parse a received string into a message."""
-        # TODO Parsing of a received message
-        pass
-
     def __init__(self, user: str, command: str, message: str = ''):
         """Creates a new message."""
         self.user = user
@@ -26,6 +21,14 @@ class Message:
 
     def __str__(self):
         """Return a string representation of the message to transmit."""
-        message = "user:{}\ncommand:{}\nmessage:{}\n\n".format(self.user, self.command,
-                                                               self.message)
+        message = "user:{}\ncommand:{}\nmessage:{}\n\n".format(
+            self.user, self.command, self.message)
         return message
+
+    @staticmethod
+    def parse(message: str):
+        """Parse the input string and return a Message instance."""
+        parts = message.split('\n', maxsplit=3)
+        self.user = parts[0][len('user:'):]
+        self.command = parts[1][len('command:'):]
+        self.message = parts[2][len('message:'):]
