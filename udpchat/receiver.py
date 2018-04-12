@@ -31,12 +31,10 @@ def receiver(port: int):
     """
     sock = socket.socket(type=socket.SOCK_DGRAM)
     sock.bind(('', port))
-    sock.listen()
 
     while True:
-        conn, _ = sock.accept()
-        data = _recvall(conn)
-        message = Message.parse(data)
+        data = _recvall(sock)
+        message = Message.parse(str(data))
 
         dt = datetime.datetime.now()
         print('{} [{}]: {}'.format(dt, message.user, message.message))
