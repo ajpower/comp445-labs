@@ -7,6 +7,8 @@ import datetime
 import socket
 from udpmessage import Message
 
+connected_users = dict()
+
 
 def _recvall(sock: socket.socket):
     """Receive all data from the socket until EOF or close and return as a byte
@@ -23,14 +25,13 @@ def _recvall(sock: socket.socket):
     return data
 
 
-def receiver(username: str, port: int, broadcast_ip: str, connected_users: dict):
+def receiver(username: str, port: int, broadcast_ip: str):
     """Start the receiver loop to accept incoming connections and extract their
     message.
 
     :param username: Username of this peer
     :param port: Source port.
     :param broadcast_ip: Address for broadcast of PING
-    :param connected_users: Dict of users to ip
     """
     hostname = socket.gethostbyname(socket.gethostname())
 

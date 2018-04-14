@@ -5,9 +5,10 @@ This handles broadcasting data entered on the command line to the network attach
 import socket
 from udpmessage import Message
 from queue import Queue
+from receiver import connected_users
 
 
-def sender(username: str, ip_address: str, port: int, connected_users: dict):
+def sender(username: str, ip_address: str, port: int):
     """Start the sender loop to handle cmd line input from the user.
 
     Process user commands and sends the appropriate message through UDP to the ip:port given.
@@ -15,7 +16,6 @@ def sender(username: str, ip_address: str, port: int, connected_users: dict):
     :param username: Username of the user.
     :param ip_address: Destination Ip Address (Should be a broadcast ip).
     :param port: Destination port
-    :param connected_users: Dictionary of connected username to ip
     """
     hostname = socket.gethostbyname(socket.gethostname())
 
