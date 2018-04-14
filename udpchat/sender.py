@@ -4,6 +4,7 @@ This handles broadcasting data entered on the command line to the network attach
 """
 import socket
 from udpmessage import Message
+from queue import Queue
 
 
 def sender(username: str, ip_address: str, port: int):
@@ -18,20 +19,28 @@ def sender(username: str, ip_address: str, port: int):
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    addr = (ip_address, port)
+    broadcast_addr = (ip_address, port)
+    local_addr = ('127.0.0.1', port)
 
     # Join the server
     join_message = Message(username, 'JOIN')
-    client_socket.sendto(str(join_message).encode('UTF-8'), addr)
+    client_socket.sendto(str(join_message).encode('UTF-8'), broadcast_addr)
 
+    message_queue = Queue()
     leave = False
     while not leave:
         user_input = input()
 
         if user_input.casefold().startswith('/leave'.casefold()):
-            udp_message = Message(username, 'LEAVE')
+            message_queue.put(Message(username, 'LEAVE'))
+            message_queue.put(Message(username, 'QUIT', None, False))
             leave = True
+        elif user_input.casefold().startswith('/who'.casefold()):
+            message_queue.put(Message(username, 'WHO', None, False))
         else:
-            udp_message = Message(username, 'TALK', user_input)
+            message_queue.put(Message(username, 'TALK', user_input))
 
-        client_socket.sendto(str(udp_message).encode('UTF-8'), addr)
+        # print("sending {}".format(str(udp_message)))
+        while not message_queue.empty():
+            message = message_queue.get()
+            client_socket.sendto(str(message).encode('UTF-8'), broadcast_addr if message.broadcast else local_addr)

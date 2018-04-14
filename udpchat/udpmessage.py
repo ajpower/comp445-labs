@@ -11,13 +11,15 @@ class Message:
         user (str): User attached to this message.
         command (str): Command for a message.
         message (str): Message payload.
+        broadcast (bool): True if this is intended for broadcast (Default True)
     """
 
-    def __init__(self, user: str, command: str, message: str = ''):
+    def __init__(self, user: str, command: str, message: str = '', broadcast: bool = True):
         """Creates a new message."""
         self.user = user
         self.message = message
         self.command = command
+        self.broadcast = broadcast
 
     def __str__(self):
         """Return a string representation of the message to transmit."""
