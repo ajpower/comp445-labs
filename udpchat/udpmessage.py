@@ -16,7 +16,8 @@ class Message:
         dest (str): Ip Address to send this message.
     """
 
-    def __init__(self, user: str, command: str, channel: str = None, message: str = '', args: str = None, dest: str = None):
+    def __init__(self, user: str, command: str, channel: str = None, message: str = '', args: str = None,
+                 dest: str = None):
         """Creates a new message."""
         self.user = user
         self.message = message

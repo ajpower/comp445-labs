@@ -7,7 +7,7 @@ import datetime
 import socket
 from udpmessage import Message
 
-chat_context = { 'users' : dict(), 'channel' : 'general'}
+chat_context = {'users': dict(), 'channel': 'general'}
 
 
 def _recvall(sock: socket.socket):
