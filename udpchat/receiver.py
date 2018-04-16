@@ -7,7 +7,7 @@ import datetime
 import socket
 from udpmessage import Message
 
-connected_users = dict()
+chat_context = { 'users' : dict(), 'channel' : 'general'}
 
 
 def _recvall(sock: socket.socket):
@@ -48,23 +48,27 @@ def receiver(username: str, port: int, broadcast_ip: str):
         dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         if message.command == 'JOIN':
-            connected_users[message.user] = message.args
+            chat_context['users'][message.user] = message.args
             print('{} {} joined!'.format(dt, message.user))
             client_socket.sendto(str(Message(user=username, command='PING', args=hostname)).encode('UTF-8'),
                                  broadcast_addr)
         elif message.command == 'LEAVE':
-            if message.user in connected_users:
-                del connected_users[message.user]
+            if message.user in chat_context['users']:
+                del chat_context['users'][message.user]
             print('{} {} left!'.format(dt, message.user))
         elif message.command == 'TALK':
-            print('{} [{}]: {}'.format(dt, message.user, message.message))
+            if message.channel == chat_context['channel']:
+                print('{} [{} #{}]: {}'.format(dt, message.user, message.channel, message.message))
         elif message.command == 'PRIVATE-TALK':
             print('{} [{}] (PRIVATE): {}'.format(dt, message.user, message.message))
         elif message.command == 'WHO':
-            print('{} Connected users: {}'.format(dt, list(connected_users.keys())))
+            print('{} Connected users: {}'.format(dt, list(chat_context['users'].keys())))
         elif message.command == 'QUIT':
             break
         elif message.command == 'PING':
-            connected_users[message.user] = message.args
+            chat_context['users'][message.user] = message.args
+        elif message.command == 'CHANNEL':
+            chat_context['channel'] = message.channel
+            print('{} Switched to channel {}'.format(dt, chat_context['channel']))
 
     print('Bye now!')
