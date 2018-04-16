@@ -10,3 +10,7 @@ For usage instructions, run `python3 httpc help`.
 ## Lab 2
 `httpfs` is a file server application through HTTP GET and POST request.
 For usage instructions, run `python3 httpfs help`.
+
+## Lab 3
+`udpchat` is a simple distributed chat client/server working on local subnetwork.
+For usage instructions, run `python3 udpchat help`.
